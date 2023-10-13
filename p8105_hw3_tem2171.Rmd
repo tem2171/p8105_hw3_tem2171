@@ -1,0 +1,39 @@
+---
+title: "p8105_hw3_tem2171"
+author: "Teresa Moore"
+date: "2023-10-13"
+output: html_document
+---
+
+## Problem 1
+
+```{r load libraies and dataset}
+library(p8105.datasets)
+data("instacart")
+
+library(dplyr)
+library(tidyverse)
+
+```
+
+```{r}
+instacart |> 
+  ggplot(aes(x = aisle_id)) + 
+  geom_histogram()
+
+instacart |>
+  group_by(aisle_id) |>
+  summarize(n_obs = n())
+
+aisle_id_df <- select(instacart, aisle_id, order_id)
+
+aisle_id_df |> 
+  group_by(aisle_id) |> 
+  summarize(total_orders = n_distinct(order_id)) |> 
+  arrange(desc(total_orders)) |> 
+  mutate(rank = row_number())|> 
+  ungroup()
+```
+
+
+There are 134 aisles. Aisle 24, 83, and 123 have the most items ordered from them, with 72,178 items, 59,172 items, and 50,257 items resepctively.
