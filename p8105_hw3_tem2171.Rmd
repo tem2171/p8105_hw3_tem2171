@@ -157,23 +157,65 @@ merged_demo_accel |>
   group_by(sex, education) |>
   summarize (count=n()) |>
   knitr::kable()
+
+merged_demo_accel |>
+  ggplot(aes(x=age)) +
+  geom_histogram(bins=10) +
+  facet_wrap(sex~education) +
+  labs(title = "Age distributions for men and women in each education category")
 ```
 The education category for both genders with the highest count is more than HS(females:59, males:56). The lowest count for females is HS equivalent (23), while the lowest count for males is less than HS(27).
+
+For females, the distribution in the more than HS category, is right skewed, meaning that on average they are younger, or below 40.
+For males, in the more than HS category, similarly to females it is right skewed, but it is less of an intense skew. 
+The other two categories are slightly left skewed, but only very slightly, meaning that there are more older females in the less than HS and HS equivalent categories.
+For the other two male categories, there is no real skewness.
 
 ## Problem 3c
 Traditional analyses of accelerometer data focus on the total activity over the day. Using your tidied dataset, 
 aggregate across minutes to create a total activity variable for each participant
 
+```{r}
+total_activity_df <- merged_demo_accel |>
+  mutate(
+    total_activity = rowSums(across(c(min1:min1440))
+  ))
+```
+
+
+## Problem 3d
 Plot these total activities (y-axis) against age (x-axis); your plot should compare men to women and have separate panels for each education level.
 Include a trend line or a smooth to illustrate differences. 
 Comment on your plot.
 
 ```{r}
-
+ggplot(total_activity_df, aes(x = age, y = total_activity, color=sex)) +
+  geom_point() +
+  geom_smooth(se=FALSE) +
+  facet_wrap(~ education) + 
+  labs(title = "Total activity against age for men and women for each education level")
 ```
+In general, the total activity against age for men and women for each education level decreases, or as age increases, in each education category, the total activity level decreases on average. For HS equivalent and more than HS, females on average had higher activity levels, while for less than high school, males have higher levels. 
 
-
-## Problem 3d
+## Problem 3e
 Accelerometer data allows the inspection activity over the course of the day. Make a three-panel plot that shows the 24-hour activity time courses for each education level and use color to indicate sex. 
 
+```{r}
+day_activity_time = total_activity_df |>
+  pivot_longer(
+    min1:min1440,
+    names_to = "minute",
+    values_to = "activity"
+    )
+
+day_activity_time |>
+  ggplot(aes(x=minute, y=activity, color=sex)) + 
+  geom_point(alpha=0.25, size=0.1) + 
+  geom_smooth() + 
+  facet_wrap(.~education) +
+  labs(title = "24-hour activity time course by education level and sex")
+```
+
 Describe in words any patterns or conclusions you can make based on this graph; including smooth trends may help identify differences.
+
+All three panels have similar shapes to them, with a dip in activity levels around the same time.
