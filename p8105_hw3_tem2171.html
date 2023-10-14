@@ -507,7 +507,7 @@ merged_demo_accel &lt;-
     sex = case_match(
       sex,
       1 ~ &quot;male&quot;,
-      0 ~ &quot;female&quot;),
+      2 ~ &quot;female&quot;),
     sex = as.factor(sex))</code></pre>
 </div>
 <div id="problem-3b" class="section level2">
@@ -532,37 +532,41 @@ these items.</p>
 </thead>
 <tbody>
 <tr class="odd">
+<td align="left">female</td>
+<td align="left">HS equivalent</td>
+<td align="right">23</td>
+</tr>
+<tr class="even">
+<td align="left">female</td>
+<td align="left">less than HS</td>
+<td align="right">28</td>
+</tr>
+<tr class="odd">
+<td align="left">female</td>
+<td align="left">more than HS</td>
+<td align="right">59</td>
+</tr>
+<tr class="even">
 <td align="left">male</td>
 <td align="left">HS equivalent</td>
 <td align="right">35</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">male</td>
 <td align="left">less than HS</td>
 <td align="right">27</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">male</td>
 <td align="left">more than HS</td>
 <td align="right">56</td>
 </tr>
-<tr class="even">
-<td align="left">NA</td>
-<td align="left">HS equivalent</td>
-<td align="right">23</td>
-</tr>
-<tr class="odd">
-<td align="left">NA</td>
-<td align="left">less than HS</td>
-<td align="right">28</td>
-</tr>
-<tr class="even">
-<td align="left">NA</td>
-<td align="left">more than HS</td>
-<td align="right">59</td>
-</tr>
 </tbody>
 </table>
+<p>The education category for both genders with the highest count is
+more than HS(females:59, males:56). The lowest count for females is HS
+equivalent (23), while the lowest count for males is less than
+HS(27).</p>
 </div>
 <div id="problem-3c" class="section level2">
 <h2>Problem 3c</h2>

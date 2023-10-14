@@ -144,7 +144,7 @@ merged_demo_accel <-
     sex = case_match(
       sex,
       1 ~ "male",
-      0 ~ "female"),
+      2 ~ "female"),
     sex = as.factor(sex))
 ```
 
@@ -158,7 +158,7 @@ merged_demo_accel |>
   summarize (count=n()) |>
   knitr::kable()
 ```
-
+The education category for both genders with the highest count is more than HS(females:59, males:56). The lowest count for females is HS equivalent (23), while the lowest count for males is less than HS(27).
 
 ## Problem 3c
 Traditional analyses of accelerometer data focus on the total activity over the day. Using your tidied dataset, 
@@ -167,6 +167,11 @@ aggregate across minutes to create a total activity variable for each participan
 Plot these total activities (y-axis) against age (x-axis); your plot should compare men to women and have separate panels for each education level.
 Include a trend line or a smooth to illustrate differences. 
 Comment on your plot.
+
+```{r}
+
+```
+
 
 ## Problem 3d
 Accelerometer data allows the inspection activity over the course of the day. Make a three-panel plot that shows the 24-hour activity time courses for each education level and use color to indicate sex. 
