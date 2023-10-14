@@ -4,36 +4,144 @@ author: "Teresa Moore"
 date: "2023-10-13"
 output: html_document
 ---
-
-## Problem 1
-
-```{r load libraies and dataset}
-library(p8105.datasets)
-data("instacart")
-
-library(dplyr)
-library(tidyverse)
-
-```
+## Problem 2
+This problem uses the BRFSS data. DO NOT include this dataset in your local data directory; instead, load the data from the p8105.datasets package using
 
 ```{r}
-instacart |> 
-  ggplot(aes(x = aisle_id)) + 
-  geom_histogram()
+library(p8105.datasets)
+data("brfss_smart2010")
 
-instacart |>
-  group_by(aisle_id) |>
-  summarize(n_obs = n())
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+```
 
-aisle_id_df <- select(instacart, aisle_id, order_id)
+## Problem 2a
+First, do some data cleaning:
 
-aisle_id_df |> 
-  group_by(aisle_id) |> 
-  summarize(total_orders = n_distinct(order_id)) |> 
-  arrange(desc(total_orders)) |> 
-  mutate(rank = row_number())|> 
-  ungroup()
+format the data to use appropriate variable names;
+focus on the “Overall Health” topic
+
+include only responses from “Excellent” to “Poor”
+organize responses as a factor taking levels ordered from “Poor” to “Excellent”
+
+```{r Problem 2a, cleaning}
+response_order <- c("Poor", "Fair", "Good", "Very good", "Excellent")
+
+overall_health_df <- brfss_smart2010 |>
+  janitor::clean_names() |>
+  filter(topic == "Overall Health") |>
+  transform(response = factor(response, levels = response_order, ordered = TRUE))
+
 ```
 
 
-There are 134 aisles. Aisle 24, 83, and 123 have the most items ordered from them, with 72,178 items, 59,172 items, and 50,257 items resepctively.
+## Problem 2b
+Using this dataset, do or answer the following (commenting on the results of each):
+
+In 2002, which states were observed at 7 or more locations? What about in 2010?
+
+```{r}
+#2002
+states_2002 <- overall_health_df |>
+  filter(year==2002) |>
+  group_by(locationabbr) |>
+  summarise(unique_locationdesc = n_distinct(locationdesc)) |>
+  filter(unique_locationdesc >= 7)
+
+#2010
+states_2010 <- overall_health_df |>
+  filter(year==2010) |>
+  group_by(locationabbr) |>
+  summarise(unique_locationdesc = n_distinct(locationdesc)) |>
+  filter(unique_locationdesc >= 7)
+
+```
+
+There were `r nrow(states_2002)` states that were observed at 7 or more locations in 2002.
+There were `r nrow(states_2010)` states that were observed at 7 or more locations in 2010.
+
+## Problem 2c
+Construct a dataset that is limited to Excellent responses, and contains, year, state, and a variable that averages the data_value across locations within a state.
+
+```{r}
+excellent_overall_health_df <- overall_health_df |>
+  filter(response == "Excellent") |>
+  group_by(year, locationabbr) |>
+  mutate(average_data_value = mean(data_value, na.rm = TRUE)) |>
+  select(year, locationabbr, average_data_value)
+```
+
+
+## Problem 2d
+Make a “spaghetti” plot of this average value over time within a state (that is, make a plot showing a line for each state across years – the geom_line geometry and group aesthetic will help).
+
+```{r}
+ggplot(excellent_overall_health_df, aes(x = year, y = average_data_value, group = locationabbr, color = locationabbr)) +
+  geom_line() +
+  labs(title = "Average Value Over Time Within Each State",
+       x = "Year",
+       y = "Average Data Value")
+```
+
+
+## Problem 2e
+Make a two-panel plot showing, for the years 2006, and 2010, distribution of data_value for responses (“Poor” to “Excellent”) among locations in NY State.
+
+```{r}
+ny_data <- overall_health_df |>
+  filter(locationabbr == "NY" & year %in% c(2006, 2010)) |>
+  separate(locationdesc, into = c("state", "county")) |>
+  select(-state) |>
+  group_by(county)
+
+ggplot(ny_data, aes(x = data_value, y = response)) +
+  geom_point(aes(color = county)) +
+  facet_grid(. ~ year) +
+  labs(
+    title = "Distribution of Data Value for Responses in New York State",
+    x = "Data Value",
+    y = "Response"
+  )
+```
+
+## Problem 3
+
+Accelerometers have become an appealing alternative to self-report techniques for studying physical activity in observational studies and clinical trials, largely because of their relative objectivity. During observation periods, the devices can measure MIMS in a short period; one-minute intervals are common. Because accelerometers can be worn comfortably and unobtrusively, they produce around-the-clock observations.
+
+This problem uses accelerometer data collected on 250 participants in the NHANES study. The participants’ demographic data can be downloaded here, and their accelerometer data can be downloaded here. Variables *MIMS are the MIMS values for each minute of a 24-hour day starting at midnight.
+
+```{r}
+demo_data = read_csv(file = "nhanes_covar.csv", skip=4) |>
+  janitor::clean_names()
+
+accel_data = read_csv(file = "nhanes_accel.csv") |>
+  janitor::clean_names()
+```
+
+## Problem 3a
+Load, tidy, merge, and otherwise organize the data sets. Your final dataset should include all originally observed variables; 
+exclude participants less than 21 years of age
+exclude those with missing demographic data
+encode data with reasonable variable classes (i.e. not numeric, and using factors with the ordering of tables and plots in mind).
+
+```{r}
+
+```
+
+
+## Problem 3 b
+Produce a reader-friendly table for the number of men and women in each education category, and create a visualization of the age distributions for men and women in each education category. Comment on these items.
+
+## Problem 3 c
+Traditional analyses of accelerometer data focus on the total activity over the day. Using your tidied dataset, 
+aggregate across minutes to create a total activity variable for each participant
+
+Plot these total activities (y-axis) against age (x-axis); your plot should compare men to women and have separate panels for each education level.
+Include a trend line or a smooth to illustrate differences. 
+Comment on your plot.
+
+## Problem 3d
+Accelerometer data allows the inspection activity over the course of the day. Make a three-panel plot that shows the 24-hour activity time courses for each education level and use color to indicate sex. 
+
+Describe in words any patterns or conclusions you can make based on this graph; including smooth trends may help identify differences.
