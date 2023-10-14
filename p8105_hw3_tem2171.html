@@ -475,24 +475,13 @@ the NHANES study. The participants’ demographic data can be downloaded
 here, and their accelerometer data can be downloaded here. Variables
 *MIMS are the MIMS values for each minute of a 24-hour day starting at
 midnight.</p>
-<pre class="r"><code>demo_data = read_csv(file = &quot;nhanes_covar.csv&quot;, skip=4) |&gt;
+<pre class="r"><code>demo_df = 
+  read.csv(file = &quot;data/nhanes_covar.csv&quot;) |&gt;
+  janitor::clean_names()
+
+accelerometer_df = 
+  read.csv(file = &quot;data/nhanes_accel.csv&quot;) |&gt;
   janitor::clean_names()</code></pre>
-<pre><code>## Rows: 250 Columns: 5
-## ── Column specification ────────────────────────────────────────────────────────
-## Delimiter: &quot;,&quot;
-## dbl (5): SEQN, sex, age, BMI, education
-## 
-## ℹ Use `spec()` to retrieve the full column specification for this data.
-## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
-<pre class="r"><code>accel_data = read_csv(file = &quot;nhanes_accel.csv&quot;) |&gt;
-  janitor::clean_names()</code></pre>
-<pre><code>## Rows: 250 Columns: 1441
-## ── Column specification ────────────────────────────────────────────────────────
-## Delimiter: &quot;,&quot;
-## dbl (1441): SEQN, min1, min2, min3, min4, min5, min6, min7, min8, min9, min1...
-## 
-## ℹ Use `spec()` to retrieve the full column specification for this data.
-## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
 </div>
 <div id="problem-3a" class="section level2">
 <h2>Problem 3a</h2>
@@ -502,16 +491,81 @@ participants less than 21 years of age exclude those with missing
 demographic data encode data with reasonable variable classes (i.e. not
 numeric, and using factors with the ordering of tables and plots in
 mind).</p>
+<pre class="r"><code>demo_df &lt;- subset(demo_df, age&gt;=21)
+demo_df &lt;- demo_df[complete.cases(demo_df), ]
+
+merged_demo_accel &lt;- 
+  left_join(demo_df, accelerometer_df, by = &quot;seqn&quot;) |&gt;
+  mutate(
+    education = case_match(
+      education,
+      1 ~ &quot;less than HS&quot;,
+      2 ~ &quot;HS equivalent&quot;,
+      3 ~ &quot;more than HS&quot;),
+    education = as.factor(education)) |&gt;
+  mutate(
+    sex = case_match(
+      sex,
+      1 ~ &quot;male&quot;,
+      0 ~ &quot;female&quot;),
+    sex = as.factor(sex))</code></pre>
 </div>
-<div id="problem-3-b" class="section level2">
-<h2>Problem 3 b</h2>
+<div id="problem-3b" class="section level2">
+<h2>Problem 3b</h2>
 <p>Produce a reader-friendly table for the number of men and women in
 each education category, and create a visualization of the age
 distributions for men and women in each education category. Comment on
 these items.</p>
+<pre class="r"><code>merged_demo_accel |&gt;
+  group_by(sex, education) |&gt;
+  summarize (count=n()) |&gt;
+  knitr::kable()</code></pre>
+<pre><code>## `summarise()` has grouped output by &#39;sex&#39;. You can override using the `.groups`
+## argument.</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">sex</th>
+<th align="left">education</th>
+<th align="right">count</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">male</td>
+<td align="left">HS equivalent</td>
+<td align="right">35</td>
+</tr>
+<tr class="even">
+<td align="left">male</td>
+<td align="left">less than HS</td>
+<td align="right">27</td>
+</tr>
+<tr class="odd">
+<td align="left">male</td>
+<td align="left">more than HS</td>
+<td align="right">56</td>
+</tr>
+<tr class="even">
+<td align="left">NA</td>
+<td align="left">HS equivalent</td>
+<td align="right">23</td>
+</tr>
+<tr class="odd">
+<td align="left">NA</td>
+<td align="left">less than HS</td>
+<td align="right">28</td>
+</tr>
+<tr class="even">
+<td align="left">NA</td>
+<td align="left">more than HS</td>
+<td align="right">59</td>
+</tr>
+</tbody>
+</table>
 </div>
-<div id="problem-3-c" class="section level2">
-<h2>Problem 3 c</h2>
+<div id="problem-3c" class="section level2">
+<h2>Problem 3c</h2>
 <p>Traditional analyses of accelerometer data focus on the total
 activity over the day. Using your tidied dataset, aggregate across
 minutes to create a total activity variable for each participant</p>

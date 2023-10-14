@@ -112,10 +112,12 @@ Accelerometers have become an appealing alternative to self-report techniques fo
 This problem uses accelerometer data collected on 250 participants in the NHANES study. The participants’ demographic data can be downloaded here, and their accelerometer data can be downloaded here. Variables *MIMS are the MIMS values for each minute of a 24-hour day starting at midnight.
 
 ```{r}
-demo_data = read_csv(file = "nhanes_covar.csv", skip=4) |>
+demo_df = 
+  read.csv(file = "data/nhanes_covar.csv") |>
   janitor::clean_names()
 
-accel_data = read_csv(file = "nhanes_accel.csv") |>
+accelerometer_df = 
+  read.csv(file = "data/nhanes_accel.csv") |>
   janitor::clean_names()
 ```
 
@@ -126,14 +128,39 @@ exclude those with missing demographic data
 encode data with reasonable variable classes (i.e. not numeric, and using factors with the ordering of tables and plots in mind).
 
 ```{r}
+demo_df <- subset(demo_df, age>=21)
+demo_df <- demo_df[complete.cases(demo_df), ]
 
+merged_demo_accel <- 
+  left_join(demo_df, accelerometer_df, by = "seqn") |>
+  mutate(
+    education = case_match(
+      education,
+      1 ~ "less than HS",
+      2 ~ "HS equivalent",
+      3 ~ "more than HS"),
+    education = as.factor(education)) |>
+  mutate(
+    sex = case_match(
+      sex,
+      1 ~ "male",
+      0 ~ "female"),
+    sex = as.factor(sex))
 ```
 
 
-## Problem 3 b
+## Problem 3b
 Produce a reader-friendly table for the number of men and women in each education category, and create a visualization of the age distributions for men and women in each education category. Comment on these items.
 
-## Problem 3 c
+```{r}
+merged_demo_accel |>
+  group_by(sex, education) |>
+  summarize (count=n()) |>
+  knitr::kable()
+```
+
+
+## Problem 3c
 Traditional analyses of accelerometer data focus on the total activity over the day. Using your tidied dataset, 
 aggregate across minutes to create a total activity variable for each participant
 
